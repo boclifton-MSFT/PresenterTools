@@ -1,0 +1,123 @@
+﻿@using System.Timers
+@implements IDisposable
+
+<div class="h3 d-flex">
+    @if (IsEditingBreakText)
+    {
+        <input @bind="BreakText" @ref="breakTextInput" class="form-control form-control-sm w-50" @onfocusout="() => IsEditingBreakText = false" />     
+    }
+    else
+    {
+        @BreakText   
+    }
+    
+    <button class="btn btn-sm ml-4" @onclick="EditBreakText">
+        <span class="oi oi-pencil" aria-hidden="true"></span>
+    </button>
+</div>
+
+<div class="my-3">
+    <input type="number" class="form-control" style="max-width: 150px;" @bind="BreakLength" />
+</div>
+
+<button class="btn btn-lg btn-success"
+        @onclick="StartCountdownTimer">
+    Start Timer
+</button>
+
+<button class="btn btn-lg btn-danger"
+        @onclick="StopCountdownTimer">
+    Stop Timer
+</button>
+
+@if (TimeRemaining > TimeSpan.Zero)
+{
+    <div class="h3 mt-3">
+        <div class="d-flex">
+            @if (IsEditingTimerText)
+            {
+                <input @bind="TimerText" @ref="timerTextInput" class="form-control form-control-sm w-50" @onfocusout="() => IsEditingTimerText = false" />     
+            }
+            else
+            {
+                @TimerText   
+            }
+    
+            <button class="btn btn-sm ml-4" @onclick="EditTimerText">
+                <span class="oi oi-pencil" aria-hidden="true"></span>
+            </button>
+        </div>
+
+        <div class="text-dark h1">@OutputTime</div>
+    </div>
+}
+
+@code {
+    private string BreakText = "Take a Break";
+    private bool IsEditingBreakText = false;
+    private ElementReference breakTextInput { get; set; }
+
+    private string TimerText = "Time Remaining";
+    private bool IsEditingTimerText = false;
+    private ElementReference timerTextInput { get; set; }
+
+    private DateTime CountdownEndTime;
+    private int BreakLength;
+    private TimeSpan TimeRemaining;
+    private string OutputTime;
+
+    private Timer timer;
+
+    private async Task EditBreakText()
+    {
+        IsEditingBreakText = true;
+        StateHasChanged();
+    }
+
+    private async Task EditTimerText()
+    {
+        IsEditingTimerText = true;
+        StateHasChanged();
+    }
+
+    private void StartCountdownTimer()
+    {
+        CountdownEndTime = DateTime.Now.AddMinutes(BreakLength);
+        timer = new Timer(1000);
+        timer.Elapsed += OnTick;
+        timer.Enabled = true;
+        timer.Start();
+    }
+
+    private void StopCountdownTimer()
+    {
+        timer.Enabled = false;
+        timer?.Stop();
+        TimeRemaining = TimeSpan.Zero;
+    }
+
+    private void OnTick(Object source, ElapsedEventArgs e)
+    {
+        TimeRemaining = CountdownEndTime.Subtract(e.SignalTime);
+        if (TimeRemaining < TimeSpan.Zero)
+        {
+            timer.Stop();
+        }
+        OutputTime = TimeRemaining.ToString(@"hh\:mm\:ss");
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (IsEditingBreakText == true)
+            await breakTextInput.FocusAsync();
+
+        if (IsEditingTimerText == true)
+            await timerTextInput.FocusAsync();
+    }
+
+    public void Dispose()
+    {
+        timer?.Stop();
+    }
+}
