@@ -40,7 +40,7 @@ namespace PresenterTools.Pages.Components
             TimeRemaining = TimeSpan.FromMinutes(BreakLength);
             OutputTime = TimeRemaining.ToString(@"hh\:mm\:ss");
 
-            timer = new Timer(1000);
+            timer = new Timer(250);
             timer.Elapsed += OnTick;
             timer.Enabled = true;
             timer.Start();
