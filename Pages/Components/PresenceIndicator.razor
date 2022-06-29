@@ -1,0 +1,16 @@
+﻿<h3>
+    Presenter here?
+    <br />
+    <button class="btn btn-lg btn-rounded @(PresenterPresent ? "btn-success" : "btn-danger")"
+            style="border-radius:50%;height:100px;width:100px;"
+            @onclick="TogglePresenter"></button>
+</h3>
+
+@code {
+    private bool PresenterPresent = true;
+
+    private void TogglePresenter()
+    {
+        PresenterPresent = !PresenterPresent;
+    }
+}
