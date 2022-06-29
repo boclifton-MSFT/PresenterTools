@@ -33,15 +33,34 @@
 @if (TimeRemaining > TimeSpan.Zero)
 {
     <div class="h3 mt-3">
-        @BreakText 
+        <div class="d-flex">
+            @if (IsEditingTimerText)
+            {
+                <input @bind="TimerText" @ref="timerTextInput" class="form-control form-control-sm w-50" @onfocusout="() => IsEditingTimerText = false" />     
+            }
+            else
+            {
+                @TimerText   
+            }
+    
+            <button class="btn btn-sm ml-4" @onclick="EditTimerText">
+                <span class="oi oi-pencil" aria-hidden="true"></span>
+            </button>
+        </div>
 
         <div class="text-dark h1">@OutputTime</div>
     </div>
 }
 
 @code {
-    private string BreakText = "Time Remaining";
+    private string BreakText = "Take a Break";
     private bool IsEditingBreakText = false;
+    private ElementReference breakTextInput { get; set; }
+
+    private string TimerText = "Time Remaining";
+    private bool IsEditingTimerText = false;
+    private ElementReference timerTextInput { get; set; }
+
     private DateTime CountdownEndTime;
     private int BreakLength;
     private TimeSpan TimeRemaining;
@@ -49,11 +68,15 @@
 
     private Timer timer;
 
-    private ElementReference breakTextInput { get; set; }
-
     private async Task EditBreakText()
     {
         IsEditingBreakText = true;
+        StateHasChanged();
+    }
+
+    private async Task EditTimerText()
+    {
+        IsEditingTimerText = true;
         StateHasChanged();
     }
 
@@ -81,13 +104,16 @@
             timer.Stop();
         }
         OutputTime = TimeRemaining.ToString(@"hh\:mm\:ss");
-        InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (IsEditingBreakText == true)
             await breakTextInput.FocusAsync();
+
+        if (IsEditingTimerText == true)
+            await timerTextInput.FocusAsync();
     }
 
     public void Dispose()
