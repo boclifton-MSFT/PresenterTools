@@ -64,6 +64,7 @@
     private void StartCountdownTimer()
     {
         CountdownEndTime = DateTime.Now.AddMinutes(BreakLength);
+        TimeRemaining = TimeSpan.From(BreakLength);
         timer = new Timer(1000);
         timer.Elapsed += OnTick;
         timer.Enabled = true;
